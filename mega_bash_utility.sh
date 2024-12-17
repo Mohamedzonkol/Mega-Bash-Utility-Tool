@@ -187,18 +187,40 @@ EOF
 yt_downloader() {
     # Check if yt-dlp is not installed
     if ! command -v yt-dlp &>/dev/null; then
-        echo "yt-dlp is not installed. Please install it using:"
-        echo -e "${COLOR_RED}sudo pip3 install -U yt-dlp${COLOR_RESET}"
-        exit 1
+        echo -e "${COLOR_RED}yt-dlp is not installed. Installing it now...${COLOR_RESET}"
+        
+        if sudo apt update && sudo apt install -y yt-dlp; then
+            echo -e "${COLOR_GREEN}yt-dlp installed successfully via apt!${COLOR_RESET}"
+        else
+            # If apt fails, fall back to pipx
+            if command -v pipx &>/dev/null; then
+                echo -e "${COLOR_YELLOW}Attempting to install yt-dlp using pipx...${COLOR_RESET}"
+                pipx install yt-dlp && echo -e "${COLOR_GREEN}yt-dlp installed successfully via pipx!${COLOR_RESET}" && return
+            else
+                echo -e "${COLOR_YELLOW}pipx not found. Setting up a virtual environment...${COLOR_RESET}"
+                python3 -m venv yt-dlp-env
+                source yt-dlp-env/bin/activate
+                pip install yt-dlp
+                echo -e "${COLOR_GREEN}yt-dlp installed successfully in a virtual environment.${COLOR_RESET}"
+                deactivate
+                return
+            fi
+        fi
     fi
+
+    default_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ" # Short video for testing
 
     # Enter URL of the YouTube video/playlist
     while true; do
-        read -p "Enter YouTube Video/Playlist URL: " url
+        read -p "Enter YouTube Video/Playlist URL (or press Enter for default test video): " url
         if [ -z "$url" ]; then
-            echo -e "${COLOR_RED}Error: URL cannot be empty, Please enter a valid YouTube URL.${COLOR_RESET}"
-        else
+            url="$default_url"
+            echo -e "${COLOR_YELLOW}Using default test video link: $url${COLOR_RESET}"
             break
+        elif [[ "$url" =~ ^https?:// ]]; then
+            break
+        else
+            echo -e "${COLOR_RED}Invalid URL. Please enter a valid YouTube link.${COLOR_RESET}"
         fi
     done
 
