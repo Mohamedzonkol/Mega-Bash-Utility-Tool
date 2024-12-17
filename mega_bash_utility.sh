@@ -8,7 +8,8 @@ COLOR_RED="\033[1;31m"
 COLOR_CYAN="\033[1;36m"
 COLOR_MAGENTA="\033[1;35m"
 text="Enjoy Man"
-# Function: Display Banner
+
+#########################  Display Banner  #############################
 show_banner() {
     echo -e "${COLOR_GREEN}"
     local message="Welcome to the Mega Bash Utility!"
@@ -23,7 +24,7 @@ show_banner() {
     echo "-------------------------------------------------------${text}"
 }
 
-# Function: Display Menu
+#########################  Display Menu  ###############################
 show_menu() {
     echo -e "${COLOR_YELLOW}Choose an option:${COLOR_RESET}"
     echo "1. System Information"
@@ -37,10 +38,11 @@ show_menu() {
     echo "9. User Management"
     echo "10. Generate Logs"
     echo "11. Fun ASCII Art"
-    echo "12. Exit"
+    echo "12. YouTube Downloader"
+    echo "13. Exit"
 }
 
-# Function: Show System Information
+#########################  System Information  ###########################
 system_info() {
     echo -e "${COLOR_CYAN}Fetching System Information...${COLOR_RESET}"
     sleep 1
@@ -53,7 +55,7 @@ system_info() {
     echo -e "${COLOR_GREEN}System Information Loaded Successfully!${COLOR_RESET}"
 }
 
-# Function: Show Disk Usage
+#############################  Disk Usage  ################################
 disk_usage() {
     echo -e "${COLOR_CYAN}Analyzing Disk Usage...${COLOR_RESET}"
     sleep 2
@@ -61,7 +63,7 @@ disk_usage() {
     echo -e "${COLOR_GREEN}Disk Usage Analysis Complete!${COLOR_RESET}"
 }
 
-# Function: Show Network Statistics
+#########################  Network Statistics  #############################
 network_stats() {
     echo -e "${COLOR_CYAN}Fetching Network Statistics...${COLOR_RESET}"
     sleep 1
@@ -76,7 +78,7 @@ network_stats() {
     echo -e "${COLOR_GREEN}Network Stats Loaded Successfully!${COLOR_RESET}"
 }
 
-# Function: CPU Usage Monitor
+############################  CPU Usage Monitor  #############################
 cpu_usage_monitor() {
     echo -e "${COLOR_CYAN}Starting CPU Usage Monitor... Press Ctrl+C to exit.${COLOR_RESET}"
     while true; do
@@ -85,14 +87,14 @@ cpu_usage_monitor() {
     done
 }
 
-# Function: Real-Time Process Viewer
+#########################  Real-Time Process Viewer  ##########################
 real_time_process_viewer() {
     echo -e "${COLOR_CYAN}Launching Real-Time Process Viewer...${COLOR_RESET}"
     sleep 1
     top
 }
 
-# Function: Disk Cleanup
+###############################  Disk Cleanup  ################################
 disk_cleanup() {
     echo -e "${COLOR_CYAN}Running Disk Cleanup...${COLOR_RESET}"
     sleep 2
@@ -103,7 +105,7 @@ disk_cleanup() {
     echo -e "${COLOR_GREEN}Disk Cleanup Completed!${COLOR_RESET}"
 }
 
-# Function: System Health Check
+############################  System Health Check  #############################
 system_health_check() {
     echo -e "${COLOR_CYAN}Performing System Health Check...${COLOR_RESET}"
     sleep 2
@@ -122,7 +124,7 @@ system_health_check() {
     echo -e "${COLOR_GREEN}System Health Check Complete!${COLOR_RESET}"
 }
 
-# Function: File Explorer
+###############################  File Explorer  ##################################
 file_explorer() {
     echo -e "${COLOR_CYAN}Launching File Explorer...${COLOR_RESET}"
     echo "Enter directory path (default: current directory):"
@@ -133,7 +135,7 @@ file_explorer() {
     echo -e "${COLOR_GREEN}File Explorer Finished!${COLOR_RESET}"
 }
 
-# Function: User Management
+###############################  User Management  #################################
 user_management() {
     echo -e "${COLOR_CYAN}User Management:${COLOR_RESET}"
     echo "1. List all users"
@@ -159,7 +161,7 @@ user_management() {
     esac
 }
 
-# Function: Generate Logs
+###############################  Generate Logs  ##################################
 generate_logs() {
     echo -e "${COLOR_CYAN}Generating Logs...${COLOR_RESET}"
     sleep 1
@@ -170,7 +172,7 @@ generate_logs() {
     echo -e "${COLOR_GREEN}Logs Generated Successfully!${COLOR_RESET}"
 }
 
-# Function: Fun ASCII Art
+###################################  ASCII Art  ###################################
 ascii_art() {
     echo -e "${COLOR_MAGENTA}Enjoy some ASCII Art:${COLOR_RESET}"
     cat << "EOF"
@@ -181,14 +183,96 @@ EOF
     echo -e "${COLOR_MAGENTA}Bash Creativity Unleashed!${COLOR_RESET}"
 }
 
-# Main Script Logic
+###############################  YouTube Downloader  ###############################
+yt_downloader() {
+    # Check if yt-dlp is not installed
+    if ! command -v yt-dlp &>/dev/null; then
+        echo "yt-dlp is not installed. Please install it using:"
+        echo -e "${COLOR_RED}sudo pip3 install -U yt-dlp${COLOR_RESET}"
+        exit 1
+    fi
+
+    # Enter URL of the YouTube video/playlist
+    while true; do
+        read -p "Enter YouTube Video/Playlist URL: " url
+        if [ -z "$url" ]; then
+            echo -e "${COLOR_RED}Error: URL cannot be empty, Please enter a valid YouTube URL.${COLOR_RESET}"
+        else
+            break
+        fi
+    done
+
+    # Ask the user for the directory to save the download
+    while true; do
+        read -p "Enter directory to save the videos (default is 'YTVids'): " directory
+        directory="${directory:-YTVids}"  # Use default 'YTVids' if no input is provided
+
+        # Check if the directory exists
+        if [ -d "$directory" ]; then
+            echo "Directory '$directory' already exists."
+            break
+        else
+            # Ask to create the directory if it doesn't exist
+            read -p "Directory '$directory' does not exist. Do you want to create it? (y/n): " create_dir
+            if [[ "$create_dir" == "y" || "$create_dir" == "Y" ]]; then
+                mkdir -p "$directory"
+                echo "Created directory: $directory"
+                break
+            else
+                echo "Please provide a valid directory."
+            fi
+        fi
+    done
+
+    # Display download options
+    echo -e "\n${COLOR_CYAN}Please choose a download option:${COLOR_RESET}"
+    echo "-------------------------------------"
+    echo "- 1. Download Video Only            -"           
+    echo "- 2. Download Audio Only            -"
+    echo "- 3. Download Both Video and Audio  -"
+    echo "-------------------------------------"
+
+    read -p "Enter your choice (1-3): " choice
+
+    # Set the filename format
+    filename="$directory/%(title)s.%(ext)s"
+
+    # Download the video based on the user's choice
+    case $choice in
+        1)
+            echo "Downloading video only..."
+            yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]" "$url" -o "$filename"
+            ;;
+        2)
+            echo "Downloading audio only..."
+            yt-dlp -x --audio-format mp3 "$url" -o "$filename"
+            ;;
+        3)
+            echo "Downloading both video and audio..."
+            yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]" "$url" -o "$filename"
+            ;;
+        *)
+            echo "Invalid choice. Exiting."
+            exit 1
+            ;;
+    esac
+
+    # Check if the download was successful
+    if [ $? -eq 0 ]; then
+        echo -e "${COLOR_GREEN}Download completed successfully!${COLOR_RESET}"
+    else
+        echo -e "${COLOR_RED}Download failed. Please check the URL and try again.${COLOR_RESET}"
+    fi
+}
+
+###############################  Main Script  ###############################
 clear
 show_banner
 
 while true; do
     echo
     show_menu
-    read -rp "Enter your choice [1-12]: " choice
+    read -rp "Enter your choice [1-13]: " choice
     echo
     case $choice in
         1) system_info ;;
@@ -202,7 +286,8 @@ while true; do
         9) user_management ;;
         10) generate_logs ;;
         11) ascii_art ;;
-        12) 
+        12) yt_downloader ;;
+        13) 
             echo -e "${COLOR_RED}Exiting... Goodbye!${COLOR_RESET}"
             exit 0
             ;;
