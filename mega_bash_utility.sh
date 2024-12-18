@@ -39,7 +39,8 @@ show_menu() {
     echo "10. Generate Logs"
     echo "11. Fun ASCII Art"
     echo "12. YouTube Downloader"
-    echo "13. Exit"
+    echo "13. Generate Alias"
+    echo "14. Exit"
 }
 
 #########################  System Information  ###########################
@@ -287,6 +288,33 @@ yt_downloader() {
     fi
 }
 
+############################## Alias Generator ##############################
+alias_generator() {
+    # Function to check if .bashrc exists
+    ensure_bashrc_exists() {
+        if [ ! -f "$HOME/.bashrc" ]; then
+            echo "Creating .bashrc file in your home directory..."
+            touch "$HOME/.bashrc"
+        fi
+    }
+
+    # Prompt the user for the alias name and command
+    read -p "Enter the command: " command
+    read -p "Enter the alias: " alias_name
+
+    # Ensure .bashrc exists
+    ensure_bashrc_exists
+
+    # Add the alias to .bashrc
+    echo "# alias for $command -> $alias_name" >> "$HOME/.bashrc"
+    echo "alias $alias_name='$command'" >> "$HOME/.bashrc"
+
+    # Inform the user and reload .bashrc
+    echo -e "${COLOR_GREEN}Alias '$alias_name' for command '$command' added to .bashrc.${COLOR_RESET}"
+    source "$HOME/.bashrc"
+    echo "Your new alias is now available in the new bash sessions"
+}
+
 ###############################  Main Script  ###############################
 clear
 show_banner
@@ -294,7 +322,7 @@ show_banner
 while true; do
     echo
     show_menu
-    read -rp "Enter your choice [1-13]: " choice
+    read -rp "Enter your choice [1-14]: " choice
     echo
     case $choice in
         1) system_info ;;
@@ -309,11 +337,13 @@ while true; do
         10) generate_logs ;;
         11) ascii_art ;;
         12) yt_downloader ;;
-        13) 
+        13) alias_generator ;;
+        14) 
             echo -e "${COLOR_RED}Exiting... Goodbye!${COLOR_RESET}"
             exit 0
             ;;
         *) echo -e "${COLOR_RED}Invalid option. Please try again.${COLOR_RESET}" ;;
     esac
     echo
+    sleep 0.5
 done
