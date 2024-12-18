@@ -9,9 +9,22 @@ COLOR_CYAN="\033[1;36m"
 COLOR_MAGENTA="\033[1;35m"
 text="Enjoy Man"
 
+#########################  Check and Install Rofi  #########################
+check_and_install_rofi() {
+    if ! command -v rofi &>/dev/null; then
+        echo -e "${COLOR_RED}Rofi is not installed. Installing it now...${COLOR_RESET}"
+        if sudo apt update && sudo apt install -y rofi; then
+            echo -e "${COLOR_GREEN}Rofi installed successfully!${COLOR_RESET}"
+        else
+            echo -e "${COLOR_RED}Failed to install Rofi. Please install it manually.${COLOR_RESET}"
+            exit 1
+        fi
+    fi
+}
+
 #########################  Display Banner  #############################
 show_banner() {
- echo -e "${COLOR_GREEN}"
+    echo -e "${COLOR_GREEN}"
     local message="Welcome to the Mega Bash Utility!"
     echo
     for ((i = 0; i < ${#message}; i++)); do
@@ -117,7 +130,6 @@ real_time_process_viewer() {
     done
 }
 
-
 ###############################  Disk Cleanup  ################################
 disk_cleanup() {
     echo -e "${COLOR_CYAN}Running Disk Cleanup...${COLOR_RESET}"
@@ -129,7 +141,6 @@ disk_cleanup() {
     echo -e "${COLOR_GREEN}Disk Cleanup Completed!${COLOR_RESET}"
     echo -e "Disk Cleanup Completed!" | rofi -dmenu -p "Disk Cleanup"
 }
-
 
 ############################  System Health Check  #############################
 system_health_check() {
@@ -156,6 +167,7 @@ system_health_check() {
     echo -e "$health_info" | rofi -dmenu -p "System Health Check"
     echo -e "${COLOR_GREEN}System Health Check Complete!${COLOR_RESET}"
 }
+
 ###############################  File Explorer  ##################################
 file_explorer() {
     echo -e "${COLOR_CYAN}Launching File Explorer...${COLOR_RESET}"
@@ -197,6 +209,7 @@ user_management() {
             ;;
     esac
 }
+
 ###############################  Generate Logs  ##################################
 generate_logs() {
     echo -e "${COLOR_CYAN}Generating Logs...${COLOR_RESET}"
@@ -334,6 +347,7 @@ fi
 
 ###############################  Main Script  ###############################
 clear
+check_and_install_rofi
 show_banner
 
 while true; do
