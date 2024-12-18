@@ -11,7 +11,7 @@ text="Enjoy Man"
 
 #########################  Display Banner  #############################
 show_banner() {
-    echo -e "${COLOR_GREEN}"
+ echo -e "${COLOR_GREEN}"
     local message="Welcome to the Mega Bash Utility!"
     echo
     for ((i = 0; i < ${#message}; i++)); do
@@ -26,33 +26,44 @@ show_banner() {
 
 #########################  Display Menu  ###############################
 show_menu() {
-    echo -e "${COLOR_YELLOW}Choose an option:${COLOR_RESET}"
-    echo "1. System Information"
-    echo "2. Disk Usage"
-    echo "3. Network Statistics"
-    echo "4. CPU Usage Monitor"
-    echo "5. Real-Time Process Viewer"
-    echo "6. Disk Cleanup"
-    echo "7. System Health Check"
-    echo "8. File Explorer"
-    echo "9. User Management"
-    echo "10. Generate Logs"
-    echo "11. Fun ASCII Art"
-    echo "12. YouTube Downloader"
-    echo "13. Generate Alias"
-    echo "14. Exit"
+    options="System Information\nDisk Usage\nNetwork Statistics\nCPU Usage Monitor\nReal-Time Process Viewer\nDisk Cleanup\nSystem Health Check\nFile Explorer\nUser Management\nGenerate Logs\nFun ASCII Art\nYouTube Downloader\nalias generator\nExit"
+    choice=$(echo -e "$options" | rofi -dmenu -p "Choose an option:")
+    case $choice in
+        "System Information") system_info ;;
+        "Disk Usage") disk_usage ;;
+        "Network Statistics") network_stats ;;
+        "CPU Usage Monitor") cpu_usage_monitor ;;
+        "Real-Time Process Viewer") real_time_process_viewer ;;
+        "Disk Cleanup") disk_cleanup ;;
+        "System Health Check") system_health_check ;;
+        "File Explorer") file_explorer ;;
+        "User Management") user_management ;;
+        "Generate Logs") generate_logs ;;
+        "Fun ASCII Art") ascii_art ;;
+        "YouTube Downloader") yt_downloader ;;
+        "alias generator") alias_generator ;;
+        "Exit") 
+            echo -e "${COLOR_RED}Exiting... Goodbye!${COLOR_RESET}"
+            exit 0
+            ;;
+        *) echo -e "${COLOR_RED}Invalid option. Please try again.${COLOR_RESET}" ;;
+    esac
 }
 
 #########################  System Information  ###########################
 system_info() {
     echo -e "${COLOR_CYAN}Fetching System Information...${COLOR_RESET}"
     sleep 1
-    echo "Hostname: $(hostname)"
-    echo "Uptime: $(uptime -p)"
-    echo "OS: $(grep '^PRETTY_NAME' /etc/os-release | cut -d= -f2 | tr -d '\"')"
-    echo "Kernel Version: $(uname -r)"
-    echo "CPU Load: $(top -bn1 | grep 'load average' | awk '{print $10 $11 $12}')"
-    echo "RAM Usage: $(free -h | grep Mem | awk '{print $3 " / " $2}')"
+    info=$(cat <<EOF
+Hostname: $(hostname)
+Uptime: $(uptime -p)
+OS: $(grep '^PRETTY_NAME' /etc/os-release | cut -d= -f2 | tr -d '\"')
+Kernel Version: $(uname -r)
+CPU Load: $(top -bn1 | grep 'load average' | awk '{print $10 $11 $12}')
+RAM Usage: $(free -h | grep Mem | awk '{print $3 " / " $2}')
+EOF
+)
+    echo "$info" | rofi -dmenu -p "System Information"
     echo -e "${COLOR_GREEN}System Information Loaded Successfully!${COLOR_RESET}"
 }
 
@@ -60,40 +71,52 @@ system_info() {
 disk_usage() {
     echo -e "${COLOR_CYAN}Analyzing Disk Usage...${COLOR_RESET}"
     sleep 2
-    df -h --output=source,size,used,avail,pcent | column -t
+    disk_usage_info=$(df -h --output=source,size,used,avail,pcent | column -t)
+    echo "$disk_usage_info" | rofi -dmenu -p "Disk Usage"
     echo -e "${COLOR_GREEN}Disk Usage Analysis Complete!${COLOR_RESET}"
 }
 
 #########################  Network Statistics  #############################
+# Function: Show Network Statistics
 network_stats() {
     echo -e "${COLOR_CYAN}Fetching Network Statistics...${COLOR_RESET}"
     sleep 1
-    echo "Active Connections: $(netstat -ant | grep ESTABLISHED | wc -l)"
-    echo "Top Bandwidth Consumers:"
+    net_stats=$(cat <<EOF
+Active Connections: $(netstat -ant | grep ESTABLISHED | wc -l)
+Top Bandwidth Consumers:
+EOF
+)
     if command -v iftop &>/dev/null; then
-        echo "(Launching iftop... Press Q to quit)"
+        net_stats+="\n(Launching iftop... Press Q to quit)"
+        echo "$net_stats" | rofi -dmenu -p "Network Statistics"
         sudo iftop
     else
-        echo -e "${COLOR_RED}iftop is not installed. Use 'sudo apt install iftop' for real-time data.${COLOR_RESET}"
+        net_stats+="\n${COLOR_RED}iftop is not installed. Use 'sudo apt install iftop' for real-time data.${COLOR_RESET}"
+        echo -e "$net_stats" | rofi -dmenu -p "Network Statistics"
     fi
     echo -e "${COLOR_GREEN}Network Stats Loaded Successfully!${COLOR_RESET}"
 }
 
 ############################  CPU Usage Monitor  #############################
 cpu_usage_monitor() {
-    echo -e "${COLOR_CYAN}Starting CPU Usage Monitor... Press Ctrl+C to exit.${COLOR_RESET}"
+    echo -e "${COLOR_CYAN}Starting CPU Usage Monitor...${COLOR_RESET}"
     while true; do
-        echo -ne "CPU Usage: $(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8"%"}')\r"
+        cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8"%"}')
+        echo -e "CPU Usage: $cpu_usage"
         sleep 1
-    done
+    done | rofi -dmenu -p "CPU Usage Monitor"
 }
 
 #########################  Real-Time Process Viewer  ##########################
 real_time_process_viewer() {
     echo -e "${COLOR_CYAN}Launching Real-Time Process Viewer...${COLOR_RESET}"
-    sleep 1
-    top
+    while true; do
+        process_list=$(ps aux --sort=-%mem | awk 'NR<=10{print $0}')
+        echo "$process_list" | rofi -dmenu -p "Real-Time Process Viewer"
+        sleep 2
+    done
 }
+
 
 ###############################  Disk Cleanup  ################################
 disk_cleanup() {
@@ -104,72 +127,89 @@ disk_cleanup() {
     echo "Clearing temporary files..."
     sudo rm -rf /tmp/*
     echo -e "${COLOR_GREEN}Disk Cleanup Completed!${COLOR_RESET}"
+    echo -e "Disk Cleanup Completed!" | rofi -dmenu -p "Disk Cleanup"
 }
+
 
 ############################  System Health Check  #############################
 system_health_check() {
     echo -e "${COLOR_CYAN}Performing System Health Check...${COLOR_RESET}"
     sleep 2
+    health_info=""
+
     echo "Checking CPU Temperature..."
     if command -v sensors &>/dev/null; then
-        sensors
+        cpu_temp=$(sensors)
+        health_info+="CPU Temperature:\n$cpu_temp\n"
     else
-        echo -e "${COLOR_RED}Install 'lm-sensors' to monitor CPU temperature.${COLOR_RESET}"
+        health_info+="${COLOR_RED}Install 'lm-sensors' to monitor CPU temperature.${COLOR_RESET}\n"
     fi
+
     echo "Checking Disk Health..."
     if command -v smartctl &>/dev/null; then
-        sudo smartctl --all /dev/sda | grep -i health
+        disk_health=$(sudo smartctl --all /dev/sda | grep -i health)
+        health_info+="Disk Health:\n$disk_health\n"
     else
-        echo -e "${COLOR_RED}Install 'smartmontools' to check disk health.${COLOR_RESET}"
+        health_info+="${COLOR_RED}Install 'smartmontools' to check disk health.${COLOR_RESET}\n"
     fi
+
+    echo -e "$health_info" | rofi -dmenu -p "System Health Check"
     echo -e "${COLOR_GREEN}System Health Check Complete!${COLOR_RESET}"
 }
-
 ###############################  File Explorer  ##################################
 file_explorer() {
     echo -e "${COLOR_CYAN}Launching File Explorer...${COLOR_RESET}"
-    echo "Enter directory path (default: current directory):"
-    read -r directory
+    directory=$(rofi -dmenu -p "Enter directory path (default: current directory):")
     directory=${directory:-$(pwd)}
-    echo "Contents of $directory:"
-    ls -lh "$directory"
+    contents=$(ls -lh "$directory")
+    echo "$contents" | rofi -dmenu -p "Contents of $directory"
     echo -e "${COLOR_GREEN}File Explorer Finished!${COLOR_RESET}"
 }
 
 ###############################  User Management  #################################
 user_management() {
     echo -e "${COLOR_CYAN}User Management:${COLOR_RESET}"
-    echo "1. List all users"
-    echo "2. Add a new user"
-    echo "3. Delete a user"
-    read -rp "Choose an option [1-3]: " user_choice
+    options="List all users\nAdd a new user\nDelete a user"
+    user_choice=$(echo -e "$options" | rofi -dmenu -p "Choose an option:")
     case $user_choice in
-        1)
-            echo "Listing all users..."
-            cut -d: -f1 /etc/passwd
+        "List all users")
+            users=$(cut -d: -f1 /etc/passwd)
+            echo "$users" | rofi -dmenu -p "All Users"
             ;;
-        2)
-            read -rp "Enter the username to add: " new_user
-            sudo adduser "$new_user"
+        "Add a new user")
+            new_user=$(rofi -dmenu -p "Enter the username to add:")
+            if [ -n "$new_user" ]; then
+                sudo adduser "$new_user"
+            else
+                echo -e "${COLOR_RED}Username cannot be empty.${COLOR_RESET}"
+            fi
             ;;
-        3)
-            read -rp "Enter the username to delete: " del_user
-            sudo deluser "$del_user"
+        "Delete a user")
+            del_user=$(rofi -dmenu -p "Enter the username to delete:")
+            if [ -n "$del_user" ]; then
+                sudo deluser "$del_user"
+            else
+                echo -e "${COLOR_RED}Username cannot be empty.${COLOR_RESET}"
+            fi
             ;;
         *)
             echo -e "${COLOR_RED}Invalid option. Returning to main menu.${COLOR_RESET}"
             ;;
     esac
 }
-
 ###############################  Generate Logs  ##################################
 generate_logs() {
     echo -e "${COLOR_CYAN}Generating Logs...${COLOR_RESET}"
     sleep 1
-    echo "System Logs:"
-    dmesg | tail -n 10
-    echo "Auth Logs:"
-    sudo tail -n 10 /var/log/auth.log
+    logs=$(cat <<EOF
+System Logs:
+$(dmesg | tail -n 10)
+
+Auth Logs:
+$(sudo tail -n 10 /var/log/auth.log)
+EOF
+)
+    echo "$logs" | rofi -dmenu -p "Generated Logs"
     echo -e "${COLOR_GREEN}Logs Generated Successfully!${COLOR_RESET}"
 }
 
@@ -212,65 +252,48 @@ yt_downloader() {
     default_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ" # Short video for testing
 
     # Enter URL of the YouTube video/playlist
-    while true; do
-        read -p "Enter YouTube Video/Playlist URL (or press Enter for default test video): " url
-        if [ -z "$url" ]; then
-            url="$default_url"
-            echo -e "${COLOR_YELLOW}Using default test video link: $url${COLOR_RESET}"
-            break
-        elif [[ "$url" =~ ^https?:// ]]; then
-            break
-        else
-            echo -e "${COLOR_RED}Invalid URL. Please enter a valid YouTube link.${COLOR_RESET}"
-        fi
-    done
+    url=$(rofi -dmenu -p "Enter YouTube Video/Playlist URL (or press Enter for default test video):")
+    if [ -z "$url" ]; then
+        url="$default_url"
+        echo -e "${COLOR_YELLOW}Using default test video link: $url${COLOR_RESET}"
+    elif [[ ! "$url" =~ ^https?:// ]]; then
+        echo -e "${COLOR_RED}Invalid URL. Please enter a valid YouTube link.${COLOR_RESET}"
+        return
+    fi
 
     # Ask the user for the directory to save the download
-    while true; do
-        read -p "Enter directory to save the videos (default is 'YTVids'): " directory
-        directory="${directory:-YTVids}"  # Use default 'YTVids' if no input is provided
+    directory=$(rofi -dmenu -p "Enter directory to save the videos (default is 'YTVids'):")
+    directory="${directory:-YTVids}"  # Use default 'YTVids' if no input is provided
 
-        # Check if the directory exists
-        if [ -d "$directory" ]; then
-            echo "Directory '$directory' already exists."
-            break
+    # Check if the directory exists
+    if [ ! -d "$directory" ]; then
+        create_dir=$(rofi -dmenu -p "Directory '$directory' does not exist. Do you want to create it? (y/n):")
+        if [[ "$create_dir" == "y" || "$create_dir" == "Y" ]]; then
+            mkdir -p "$directory"
+            echo "Created directory: $directory"
         else
-            # Ask to create the directory if it doesn't exist
-            read -p "Directory '$directory' does not exist. Do you want to create it? (y/n): " create_dir
-            if [[ "$create_dir" == "y" || "$create_dir" == "Y" ]]; then
-                mkdir -p "$directory"
-                echo "Created directory: $directory"
-                break
-            else
-                echo "Please provide a valid directory."
-            fi
+            echo "Please provide a valid directory."
+            return
         fi
-    done
+    fi
 
     # Display download options
-    echo -e "\n${COLOR_CYAN}Please choose a download option:${COLOR_RESET}"
-    echo "-------------------------------------"
-    echo "- 1. Download Video Only            -"           
-    echo "- 2. Download Audio Only            -"
-    echo "- 3. Download Both Video and Audio  -"
-    echo "-------------------------------------"
-
-    read -p "Enter your choice (1-3): " choice
+    choice=$(echo -e "1. Download Video Only\n2. Download Audio Only\n3. Download Both Video and Audio" | rofi -dmenu -p "Please choose a download option:")
 
     # Set the filename format
     filename="$directory/%(title)s.%(ext)s"
 
     # Download the video based on the user's choice
     case $choice in
-        1)
+        "1. Download Video Only")
             echo "Downloading video only..."
             yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]" "$url" -o "$filename"
             ;;
-        2)
+        "2. Download Audio Only")
             echo "Downloading audio only..."
             yt-dlp -x --audio-format mp3 "$url" -o "$filename"
             ;;
-        3)
+        "3. Download Both Video and Audio")
             echo "Downloading both video and audio..."
             yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]" "$url" -o "$filename"
             ;;
@@ -290,29 +313,23 @@ yt_downloader() {
 
 ############################## Alias Generator ##############################
 alias_generator() {
-    # Function to check if .bashrc exists
-    ensure_bashrc_exists() {
-        if [ ! -f "$HOME/.bashrc" ]; then
-            echo "Creating .bashrc file in your home directory..."
-            touch "$HOME/.bashrc"
-        fi
-    }
+ alias_name=$(rofi -dmenu -p "Enter alias name:")
+command=$(rofi -dmenu -p "Enter command for alias:")
 
-    # Prompt the user for the alias name and command
-    read -p "Enter the command: " command
-    read -p "Enter the alias: " alias_name
+if [ -n "$alias_name" ] && [ -n "$command" ]; then
+  if [ -n "$ZSH_VERSION" ];then
+    echo "alias $alias_name='$command'" >> ~/.zshrc
+    source ~/.zshrc
+    echo "Alias '$alias_name' added successfully."
+  elif [ -n "$BASH_VERSION" ];then
+  echo "alias $alias_name='$command'" >> ~/.bashrc
+  source ~/.bashrc
+  echo "Alias '$alias_name' added successfully."
 
-    # Ensure .bashrc exists
-    ensure_bashrc_exists
-
-    # Add the alias to .bashrc
-    echo "# alias for $command -> $alias_name" >> "$HOME/.bashrc"
-    echo "alias $alias_name='$command'" >> "$HOME/.bashrc"
-
-    # Inform the user and reload .bashrc
-    echo -e "${COLOR_GREEN}Alias '$alias_name' for command '$command' added to .bashrc.${COLOR_RESET}"
-    source "$HOME/.bashrc"
-    echo "Your new alias is now available in the new bash sessions"
+else
+    echo "Alias name or command cannot be empty."
+fi
+fi
 }
 
 ###############################  Main Script  ###############################
@@ -322,28 +339,4 @@ show_banner
 while true; do
     echo
     show_menu
-    read -rp "Enter your choice [1-14]: " choice
-    echo
-    case $choice in
-        1) system_info ;;
-        2) disk_usage ;;
-        3) network_stats ;;
-        4) cpu_usage_monitor ;;
-        5) real_time_process_viewer ;;
-        6) disk_cleanup ;;
-        7) system_health_check ;;
-        8) file_explorer ;;
-        9) user_management ;;
-        10) generate_logs ;;
-        11) ascii_art ;;
-        12) yt_downloader ;;
-        13) alias_generator ;;
-        14) 
-            echo -e "${COLOR_RED}Exiting... Goodbye!${COLOR_RESET}"
-            exit 0
-            ;;
-        *) echo -e "${COLOR_RED}Invalid option. Please try again.${COLOR_RESET}" ;;
-    esac
-    echo
-    sleep 0.5
 done
