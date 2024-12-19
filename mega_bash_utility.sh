@@ -326,23 +326,27 @@ yt_downloader() {
 
 ############################## Alias Generator ##############################
 alias_generator() {
- alias_name=$(rofi -dmenu -p "Enter alias name:")
-command=$(rofi -dmenu -p "Enter command for alias:")
+  alias_name=$(rofi -dmenu -p "Enter alias name:")
+  command=$(rofi -dmenu -p "Enter command for alias:")
 
-if [ -n "$alias_name" ] && [ -n "$command" ]; then
-  if [ -n "$ZSH_VERSION" ];then
-    echo "alias $alias_name='$command'" >> ~/.zshrc
-    source ~/.zshrc
-    echo "Alias '$alias_name' added successfully."
-  elif [ -n "$BASH_VERSION" ];then
-  echo "alias $alias_name='$command'" >> ~/.bashrc
-  source ~/.bashrc
-  echo "Alias '$alias_name' added successfully."
+  if [ -n "$alias_name" ] && [ -n "$command" ]; then
+    # Detect the current shell
+    current_shell=$(basename "$SHELL")
 
-else
+    if [ "$current_shell" = "zsh" ]; then
+      echo "alias $alias_name='$command'" >> ~/.zshrc
+      source ~/.zshrc
+      echo "Alias '$alias_name' added successfully to .zshrc."
+    elif [ "$current_shell" = "bash" ]; then
+      echo "alias $alias_name='$command'" >> ~/.bashrc
+      source ~/.bashrc
+      echo "Alias '$alias_name' added successfully to .bashrc."
+    else
+      echo "Unsupported shell: $current_shell. Please add the alias manually."
+    fi
+  else
     echo "Alias name or command cannot be empty."
-fi
-fi
+  fi
 }
 
 ###############################  Main Script  ###############################
