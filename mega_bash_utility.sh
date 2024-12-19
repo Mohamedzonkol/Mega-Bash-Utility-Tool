@@ -9,6 +9,96 @@ COLOR_CYAN="\033[1;36m"
 COLOR_MAGENTA="\033[1;35m"
 text="Enjoy Man"
 
+
+
+
+#########################  install missing tools dynamically  #############################
+check_and_install_tool() {
+    local tool=$1
+    local package=$2
+    if ! command -v "$tool" &>/dev/null; then
+        echo -e "${COLOR_YELLOW}$tool is not installed. Installing now...${COLOR_RESET}"
+        if sudo apt update && sudo apt install -y "$package"; then
+            echo -e "${COLOR_GREEN}$tool installed successfully!${COLOR_RESET}"
+        else
+            echo -e "${COLOR_RED}Failed to install $tool. Please install it manually.${COLOR_RESET}"
+            return 1
+        fi
+    fi
+    return 0
+}
+#########################   Spinner animation  #############################
+
+spinner() {
+    local pid=$1
+    local delay=0.1
+    local spinstr='|/-\'
+    while ps -p $pid &>/dev/null; do
+        for char in $(echo "$spinstr" | fold -w1); do
+            echo -ne "$char\r"
+            sleep $delay
+        done
+    done
+    echo -ne " \r"
+}
+#########################  Display Banner  #############################
+show_animated_banner() {
+    echo -e "${COLOR_MAGENTA}"
+    local message="Welcome to the Mega Bash Utility!"
+    for ((i = 0; i < ${#message}; i++)); do
+        echo -n "${message:i:1}"
+        sleep 0.03
+    done
+    echo -e "\n${COLOR_BLUE}--------------------------------------------"
+    echo -e " Explore tools for monitoring, managing, and optimizing! "
+    echo -e "--------------------------------------------${COLOR_RESET}\n"
+    sleep 1
+}
+#########################  Display Menu  ###############################
+show_menu() {
+    echo -e "${COLOR_CYAN}Generating Menu...${COLOR_RESET}" | spinner &
+    sleep 1
+    clear
+
+    options=(
+        "System Information"
+        "Disk Usage"
+        "Network Statistics"
+        "CPU Usage Monitor"
+        "Real-Time Process Viewer"
+        "Disk Cleanup"
+        "System Health Check"
+        "File Explorer"
+        "User Management"
+        "Generate Logs"
+        "Fun ASCII Art"
+        "YouTube Downloader"
+        "Alias Generator"
+        "Exit"
+    )
+
+    PS3="Select an option: "
+    select choice in "${options[@]}"; do
+        case $REPLY in
+            1) system_info ;;
+            2) disk_usage ;;
+            3) network_stats ;;
+            4) cpu_usage_monitor ;;
+            5) real_time_process_viewer ;;
+            6) disk_cleanup ;;
+            7) system_health_check ;;
+            8) file_explorer ;;
+            9) user_management ;;
+            10) generate_logs ;;
+            11) ascii_art ;;
+            12) yt_downloader ;;
+            13) alias_generator ;;
+            14) echo -e "${COLOR_RED}Exiting... Goodbye!${COLOR_RESET}"; exit 0 ;;
+            *) echo -e "${COLOR_RED}Invalid option. Please try again.${COLOR_RESET}" ;;
+        esac
+    done
+}
+
 #########################  Check and Install Rofi  #########################
 check_and_install_rofi() {
     if ! command -v rofi &>/dev/null; then
@@ -21,50 +111,27 @@ check_and_install_rofi() {
         fi
     fi
 }
-
-#########################  Display Banner  #############################
-show_banner() {
-    echo -e "${COLOR_GREEN}"
-    local message="Welcome to the Mega Bash Utility!"
-    echo
-    for ((i = 0; i < ${#message}; i++)); do
-        echo -n "${message:i:1}"
-        sleep 0.05
-    done
-    echo -e "${COLOR_RESET}"
-    echo -e "${COLOR_BLUE}-------------------------------------------------------"
-    echo " Explore tools for monitoring, managing, and optimizing!"
-    echo "-------------------------------------------------------${text}"
+post_operation_quit_check() {
+    echo -e "${COLOR_MAGENTA}Press q to quit or any other key to continue:${COLOR_RESET}"
+    read -r input
+    if [[ "$input" == "q" ]]; then
+        echo -e "${COLOR_RED}Exiting the program. Goodbye!${COLOR_RESET}"
+        exit 0
+    fi
 }
 
-#########################  Display Menu  ###############################
-show_menu() {
-    options="System Information\nDisk Usage\nNetwork Statistics\nCPU Usage Monitor\nReal-Time Process Viewer\nDisk Cleanup\nSystem Health Check\nFile Explorer\nUser Management\nGenerate Logs\nFun ASCII Art\nYouTube Downloader\nalias generator\nExit"
-    choice=$(echo -e "$options" | rofi -dmenu -p "Choose an option:")
-    case $choice in
-        "System Information") system_info ;;
-        "Disk Usage") disk_usage ;;
-        "Network Statistics") network_stats ;;
-        "CPU Usage Monitor") cpu_usage_monitor ;;
-        "Real-Time Process Viewer") real_time_process_viewer ;;
-        "Disk Cleanup") disk_cleanup ;;
-        "System Health Check") system_health_check ;;
-        "File Explorer") file_explorer ;;
-        "User Management") user_management ;;
-        "Generate Logs") generate_logs ;;
-        "Fun ASCII Art") ascii_art ;;
-        "YouTube Downloader") yt_downloader ;;
-        "alias generator") alias_generator ;;
-        "Exit") 
-            echo -e "${COLOR_RED}Exiting... Goodbye!${COLOR_RESET}"
-            exit 0
-            ;;
-        *) echo -e "${COLOR_RED}Invalid option. Please try again.${COLOR_RESET}" ;;
-    esac
+quit_check() {
+    echo -e "${COLOR_MAGENTA}Press q to quit or any other key to proceed:${COLOR_RESET}"
+    read -r input
+    if [[ "$input" == "q" ]]; then
+        echo -e "${COLOR_RED}Operation cancelled by user.${COLOR_RESET}"
+        return 1
+    fi
+    return 0
 }
-
 #########################  System Information  ###########################
 system_info() {
+    echo -e "${COLOR_CYAN}Fetching System Information...${COLOR_RESET}"
     echo -e "${COLOR_CYAN}Fetching System Information...${COLOR_RESET}"
     sleep 1
     info=$(cat <<EOF
@@ -74,10 +141,13 @@ OS: $(grep '^PRETTY_NAME' /etc/os-release | cut -d= -f2 | tr -d '\"')
 Kernel Version: $(uname -r)
 CPU Load: $(top -bn1 | grep 'load average' | awk '{print $10 $11 $12}')
 RAM Usage: $(free -h | grep Mem | awk '{print $3 " / " $2}')
+Swap Usage: $(free -h | grep Swap | awk '{print $3 " / " $2}')
 EOF
 )
+    
     echo "$info" | rofi -dmenu -p "System Information"
     echo -e "${COLOR_GREEN}System Information Loaded Successfully!${COLOR_RESET}"
+   
 }
 
 #############################  Disk Usage  ################################
@@ -90,7 +160,6 @@ disk_usage() {
 }
 
 #########################  Network Statistics  #############################
-# Function: Show Network Statistics
 network_stats() {
     echo -e "${COLOR_CYAN}Fetching Network Statistics...${COLOR_RESET}"
     sleep 1
@@ -99,53 +168,106 @@ Active Connections: $(netstat -ant | grep ESTABLISHED | wc -l)
 Top Bandwidth Consumers:
 EOF
 )
+    check_and_install_tool "iftop" "iftop" || return
     if command -v iftop &>/dev/null; then
         net_stats+="\n(Launching iftop... Press Q to quit)"
         echo "$net_stats" | rofi -dmenu -p "Network Statistics"
         sudo iftop
+        post_operation_quit_check
+
     else
         net_stats+="\n${COLOR_RED}iftop is not installed. Use 'sudo apt install iftop' for real-time data.${COLOR_RESET}"
         echo -e "$net_stats" | rofi -dmenu -p "Network Statistics"
+        post_operation_quit_check
+
     fi
     echo -e "${COLOR_GREEN}Network Stats Loaded Successfully!${COLOR_RESET}"
+
 }
 
 ############################  CPU Usage Monitor  #############################
 cpu_usage_monitor() {
     echo -e "${COLOR_CYAN}Starting CPU Usage Monitor...${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}Press Ctrl+C to exit.${COLOR_RESET}"
+    
+    echo -e "\033[1;33m"
     while true; do
-        cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8"%"}')
-        echo -e "CPU Usage: $cpu_usage"
-        sleep 1
-    done | rofi -dmenu -p "CPU Usage Monitor"
+        echo -ne "CPU Usage: $(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}')\r"
+        sleep 4
+        
+        echo -e "\n${COLOR_MAGENTA}Press q to quit or any other key to continue monitoring:${COLOR_RESET}"
+        read -t 5 -r input
+        if [[ "$input" == "q" ]]; then
+            echo -e "${COLOR_RED}Exiting CPU Usage Monitor.${COLOR_RESET}"
+            break
+        fi
+    done
+    echo -e "\033[0m"
 }
+
 
 #########################  Real-Time Process Viewer  ##########################
 real_time_process_viewer() {
     echo -e "${COLOR_CYAN}Launching Real-Time Process Viewer...${COLOR_RESET}"
     while true; do
         process_list=$(ps aux --sort=-%mem | awk 'NR<=10{print $0}')
+        echo -e "${COLOR_YELLOW}Top 10 Processes by Memory Usage:${COLOR_RESET}"
         echo "$process_list" | rofi -dmenu -p "Real-Time Process Viewer"
-        sleep 2
+
+        echo -e "${COLOR_MAGENTA}Press q to quit or any other key to refresh the process list:${COLOR_RESET}"
+        read -t 5 -r input
+        if [[ "$input" == "q" ]]; then
+            echo -e "${COLOR_RED}Exiting Real-Time Process Viewer.${COLOR_RESET}"
+            break
+        fi
     done
 }
 
 ###############################  Disk Cleanup  ################################
 disk_cleanup() {
     echo -e "${COLOR_CYAN}Running Disk Cleanup...${COLOR_RESET}"
-    sleep 2
-    echo "Clearing apt cache..."
-    sudo apt-get clean
-    echo "Clearing temporary files..."
-    sudo rm -rf /tmp/*
-    echo -e "${COLOR_GREEN}Disk Cleanup Completed!${COLOR_RESET}"
-    echo -e "Disk Cleanup Completed!" | rofi -dmenu -p "Disk Cleanup"
+
+    while true; do
+        echo -e "${COLOR_YELLOW}Do you want to clear apt cache? (y/n/q):${COLOR_RESET}"
+        read -r input
+        if [[ "$input" == "q" ]]; then
+            echo -e "${COLOR_RED}Cleanup operation aborted.${COLOR_RESET}"
+            return
+        elif [[ "$input" == "y" ]]; then
+            echo -e "${COLOR_BLUE}Clearing apt cache...${COLOR_RESET}"
+            sudo apt-get clean
+            break
+        elif [[ "$input" == "n" ]]; then
+            break
+        else
+            echo -e "${COLOR_RED}Invalid input. Please enter y, n, or q.${COLOR_RESET}"
+        fi
+    done
+
+    while true; do
+        echo -e "${COLOR_YELLOW}Do you want to clear temporary files? (y/n/q):${COLOR_RESET}"
+        read -r input
+        if [[ "$input" == "q" ]]; then
+            echo -e "${COLOR_RED}Cleanup operation aborted.${COLOR_RESET}"
+            return
+        elif [[ "$input" == "y" ]]; then
+            echo -e "${COLOR_BLUE}Clearing temporary files...${COLOR_RESET}"
+            rm -rf /tmp/*
+            break
+        elif [[ "$input" == "n" ]]; then
+            break
+        else
+            echo -e "${COLOR_RED}Invalid input. Please enter y, n, or q.${COLOR_RESET}"
+        fi
+    done
+
+    echo -e "${COLOR_GREEN}Disk Cleanup Complete!${COLOR_RESET}"
 }
 
 ############################  System Health Check  #############################
 system_health_check() {
     echo -e "${COLOR_CYAN}Performing System Health Check...${COLOR_RESET}"
-    sleep 2
+    sleep 2 
     health_info=""
 
     echo "Checking CPU Temperature..."
@@ -169,13 +291,38 @@ system_health_check() {
 }
 
 ###############################  File Explorer  ##################################
+# File Explorer with Operations
 file_explorer() {
-    echo -e "${COLOR_CYAN}Launching File Explorer...${COLOR_RESET}"
-    directory=$(rofi -dmenu -p "Enter directory path (default: current directory):")
-    directory=${directory:-$(pwd)}
-    contents=$(ls -lh "$directory")
-    echo "$contents" | rofi -dmenu -p "Contents of $directory"
-    echo -e "${COLOR_GREEN}File Explorer Finished!${COLOR_RESET}"
+    local directory=$(rofi -dmenu -p "Enter Directory:" <<< "$HOME")
+    if [[ ! -d "$directory" ]]; then
+        echo -e "${COLOR_RED}Invalid directory.${COLOR_RESET}"
+        return
+    fi
+
+    local file=$(ls "$directory" | rofi -dmenu -p "Select File:")
+    if [[ -z "$file" ]]; then
+        echo -e "${COLOR_RED}No file selected.${COLOR_RESET}"
+        return
+    fi
+
+    local operation=$(echo -e "View\nCopy\nDelete" | rofi -dmenu -p "Choose Operation:")
+    case "$operation" in
+        "View")
+            xdg-open "$directory/$file" &
+            ;;
+        "Copy")
+            local dest=$(rofi -dmenu -p "Copy To Directory:")
+            cp "$directory/$file" "$dest"
+            echo -e "${COLOR_GREEN}File copied successfully to $dest${COLOR_RESET}"
+            ;;
+        "Delete")
+            rm "$directory/$file"
+            echo -e "${COLOR_GREEN}File deleted successfully.${COLOR_RESET}"
+            ;;
+        *)
+            echo -e "${COLOR_RED}Invalid operation.${COLOR_RESET}"
+            ;;
+    esac
 }
 
 ###############################  User Management  #################################
@@ -229,14 +376,15 @@ EOF
 ###################################  ASCII Art  ###################################
 ascii_art() {
     echo -e "${COLOR_MAGENTA}Enjoy some ASCII Art:${COLOR_RESET}"
+    echo -e "\n"
     cat << "EOF"
        /\_/\  
       ( o.o ) 
        > ^ <  
+    Mega Bash Utility Art! 🚀
 EOF
-    echo -e "${COLOR_MAGENTA}Bash Creativity Unleashed!${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}Art Loaded Successfully!${COLOR_RESET}"
 }
-
 ###############################  YouTube Downloader  ###############################
 yt_downloader() {
     # Check if yt-dlp is not installed
@@ -352,9 +500,8 @@ alias_generator() {
 ###############################  Main Script  ###############################
 clear
 check_and_install_rofi
-show_banner
-
+show_animated_banner
 while true; do
-    echo
+    # echo
     show_menu
 done
