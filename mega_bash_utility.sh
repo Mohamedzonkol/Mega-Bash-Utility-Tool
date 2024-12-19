@@ -59,7 +59,6 @@ show_menu() {
     echo -e "${COLOR_CYAN}Generating Menu...${COLOR_RESET}" | spinner &
     sleep 1
     clear
-
     options=(
         "System Information"
         "Disk Usage"
