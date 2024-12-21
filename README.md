@@ -33,6 +33,7 @@ The script automatically checks for missing tools and installs them if not alrea
 - **smartmontools** (optional, for disk health monitoring)
 - **rofi** (for enhanced menu navigation)
 - Standard Linux utilities (`df`, `netstat`, `ls`, etc.)
+  
 Ensure your system has `sudo` privileges to allow installation.
 
 Install missing dependencies with:
