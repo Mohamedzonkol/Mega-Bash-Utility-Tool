@@ -1,7 +1,6 @@
 # Mega Bash Utility 🚀
 
 The **Mega Bash Utility** is an all-in-one Bash script for system monitoring, management, and optimization. It combines powerful tools and user-friendly features to help you manage your Linux system efficiently.
-
 ---
 
 ## Features 🌟
@@ -19,24 +18,28 @@ The **Mega Bash Utility** is an all-in-one Bash script for system monitoring, ma
    - Check disk health (requires `smartmontools`).
 8. **File Explorer**: Explore directories and list file details interactively.
 9. **User Management**: Add, list, or delete system users.
-10. **Generate Logs**: View recent system and authentication logs.
-11. **Fun ASCII Art**: Enjoy a light-hearted touch of creativity.
+10. **YouTube Downloader**: Download videos in a variety of formats directly from YouTube.
+11. **Alias Generator**: Create and manage custom terminal aliases with ease.
+12. **Generate Logs**: View recent system and authentication logs.
+13. **Fun ASCII Art**: Enjoy a light-hearted touch of creativity.
 
 ---
 
 ## Prerequisites 🛠️
 
-Ensure the following tools are installed on your system:
+The script automatically checks for missing tools and installs them if not already present. This includes:
 - **iftop** (optional, for network bandwidth monitoring)
 - **lm-sensors** (optional, for CPU temperature monitoring)
 - **smartmontools** (optional, for disk health monitoring)
+- **rofi** (for enhanced menu navigation)
 - Standard Linux utilities (`df`, `netstat`, `ls`, etc.)
+Ensure your system has `sudo` privileges to allow installation.
 
 Install missing dependencies with:
  
 ```bash
 sudo apt update
-sudo apt install iftop lm-sensors smartmontools -y
+sudo apt install iftop lm-sensors smartmontools rofi -y
 ```
 
 ---
@@ -87,7 +90,9 @@ Follow the interactive menu to explore various tools and features.
 | 9      | Manage users (add/list/delete)             |
 | 10     | Generate and view recent system logs       |
 | 11     | View fun ASCII art                         |
-| 12     | Exit the utility                           |
+| 12     | Download videos from YouTube               |
+| 13     | Generate and manage terminal aliases       |
+| 14     | Exit the utility                           |
 
 ---
 
@@ -125,4 +130,6 @@ Contributions are welcome! To contribute:
 ## Author ✍️  
 Created with ❤️ by [Mohamed Zonkol](https://github.com/mohamedzonkol).  
 For inquiries, email: mo.zonkol@gmail.com
+
+If you'd like to tweak further sections or add more examples, let me know! 🚀
 
