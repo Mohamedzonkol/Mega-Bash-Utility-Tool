@@ -22,6 +22,8 @@ The **Mega Bash Utility** is an all-in-one Bash script for system monitoring, ma
 11. **Alias Generator**: Create and manage custom terminal aliases with ease.
 12. **Generate Logs**: View recent system and authentication logs.
 13. **Fun ASCII Art**: Enjoy a light-hearted touch of creativity.
+14. **Weather**: Check Weather of a specific city.
+15. **Currency Exchange**: Get a Currency Exchange rate.
 
 ---
 
@@ -93,6 +95,8 @@ Follow the interactive menu to explore various tools and features.
 | 11     | View fun ASCII art                         |
 | 12     | Download videos from YouTube               |
 | 13     | Generate and manage terminal aliases       |
+| 14     | Check Weather of a specified city          |
+| 15     | Get Currency Exchange rate                 |
 | 14     | Exit the utility                           |
 
 ---
