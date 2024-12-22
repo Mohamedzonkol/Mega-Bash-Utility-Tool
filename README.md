@@ -18,10 +18,10 @@ The **Mega Bash Utility** is an all-in-one Bash script for system monitoring, ma
    - Check disk health (requires `smartmontools`).
 8. **File Explorer**: Explore directories and list file details interactively.
 9. **User Management**: Add, list, or delete system users.
-10. **YouTube Downloader**: Download videos in a variety of formats directly from YouTube.
-11. **Alias Generator**: Create and manage custom terminal aliases with ease.
-12. **Generate Logs**: View recent system and authentication logs.
-13. **Fun ASCII Art**: Enjoy a light-hearted touch of creativity.
+10. **Generate Logs**: View recent system and authentication logs.
+11. **Fun ASCII Art**: Enjoy a light-hearted touch of creativity.
+12. **YouTube Downloader**: Download videos in a variety of formats directly from YouTube.
+13. **Alias Generator**: Create and manage custom terminal aliases with ease.
 14. **Weather**: Check Weather of a specific city.
 15. **Currency Exchange**: Get a Currency Exchange rate.
 
@@ -97,7 +97,7 @@ Follow the interactive menu to explore various tools and features.
 | 13     | Generate and manage terminal aliases       |
 | 14     | Check Weather of a specified city          |
 | 15     | Get Currency Exchange rate                 |
-| 14     | Exit the utility                           |
+| 16     | Exit the utility                           |
 
 ---
 
