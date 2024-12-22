@@ -503,9 +503,23 @@ alias_generator() {
 #################################  Weather  #################################
 weather_info()
 {
-    city=$(rofi -dmenu -p "Enter city name: ")
-    curl "wttr.in/$city"
+    PREDEFINED_CITIES="Cairo\nLondon\nNew York\nTokyo\nParis\nEnter Custom City"
+    selected_option=$(echo -e "$PREDEFINED_CITIES" | rofi -dmenu -p "Select city: ")
+
+    if [[ "$selected_option" == "Enter Custom City" ]]; then
+        city=$(rofi -dmenu -p "Enter city name: ")
+    else
+        city="$selected_option"
+    fi
+
+    # Fetch weather data
+    if [[ -n "$city" ]]; then
+        curl "wttr.in/$city"
+    else
+        echo "No city selected. Exiting."
+    fi
 }
+
 
 ############################  Currency Exchange  ############################
 currency_exchange()
